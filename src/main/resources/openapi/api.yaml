@@ -1,0 +1,427 @@
+openapi: 3.0.0
+info:
+  title: API Orders Management v1
+  version: 1.0.0
+  description: API para la gestión de clientes, productos, pedidos y autenticación.
+servers:
+  - url: http://localhost:8180
+
+tags:
+  - name: Clientes
+    description: Operaciones relacionadas con la gestión de Clientes
+  - name: Productos
+    description: Operaciones relacionadas con la gestión de Productos
+  - name: Pedidos
+    description: Operaciones relacionadas con la gestión de Pedidos
+  - name: Autenticación
+    description: Operaciones para login y generación de JWT
+
+paths:
+  /clientes:
+    get:
+      tags:
+        - Clientes
+      summary: Obtener todos los clientes
+      operationId: getAllClientes
+      description: Retorna una lista con todos los clientes.
+      parameters:
+        - $ref: '#/components/parameters/Authorization'
+      responses:
+        '200':
+          description: Lista de clientes obtenida
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ClienteResponse'
+        '204':
+          description: No hay clientes
+        '500':
+          description: Error al obtener clientes
+    post:
+      tags:
+        - Clientes
+      summary: Crear cliente
+      operationId: createCliente
+      description: Crea un nuevo cliente
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClienteRequest'
+      responses:
+        '201':
+          description: Cliente creado exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClienteResponse'
+        '500':
+          description: Error al crear cliente
+  /clientes/{id}:
+    get:
+      tags:
+        - Clientes
+      summary: Obtener cliente por ID
+      operationId: getClienteById
+      description: Retorna un cliente segun el ID proporcionado
+      parameters:
+        - $ref: '#/components/parameters/Authorization'
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: El ID del cliente
+      responses:
+        '200':
+          description: Cliente encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClienteResponse'
+        '500':
+          description: Error al obtener cliente por ID
+    put:
+      tags:
+        - Clientes
+      summary: Actualizar cliente
+      operationId: updateCliente
+      description: Actualiza los datos de un cliente existente.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: ID del cliente a actualizar
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClienteRequest'
+      responses:
+        '200':
+          description: Cliente actualizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClienteResponse'
+        '404':
+          description: Cliente no encontrado
+        '500':
+          description: Error al actualizar cliente
+    delete:
+      tags:
+        - Clientes
+      summary: Eliminar cliente
+      operationId: deleteCliente
+      description: Elimina un cliente segun su ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: ID del cliente a eliminar
+      responses:
+        '200':
+          description: Cliente eliminado
+        '404':
+          description: Cliente no encontrado
+        '500':
+          description: Error al eliminar cliente
+
+  /productos:
+    get:
+      tags:
+        - Productos
+      summary: Obtener todos los productos
+      operationId: getAllProductos
+      description: Retorna una lista con todos los productos
+      responses:
+        '200':
+          description: Productos obtenidos
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ProductoResponse'
+        '204':
+          description: No hay clientes disponibles
+        '500':
+          description: Error al obtener productos
+  /productos/{id}:
+    get:
+      tags:
+        - Productos
+      summary: Obtener producto por ID
+      operationId: getProductoById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: El ID del producto
+      responses:
+        '200':
+          description: Producto encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductoResponse'
+        '204':
+          description: Producto no encontrado
+        '500':
+          description: Error al obtener producto por ID
+
+  /pedidos:
+    post:
+      tags:
+        - Pedidos
+      summary: Crear un nuevo pedido
+      operationId: createPedido
+      description: Crea un nuevo pedido
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PedidoRequest'
+      responses:
+        '201':
+          description: Pedido creado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PedidoResponse'
+        '500':
+          description: Error al crear pedido
+
+  /pedidos/from-range-and-estado:
+    get:
+      tags:
+        - Pedidos
+      summary: Obtener pedidos por rango de fechas y estado
+      operationId: getPedidosFromRangeAndEstado
+      parameters:
+        - name: desde
+          required: true
+          in: query
+          schema:
+            type: string
+            example: dd-mm-yyyy
+        - name: hasta
+          required: true
+          in: query
+          schema:
+            type: string
+            example: dd-mm-yyyy
+        - name: estado
+          required: false
+          in: query
+          schema:
+            type: string
+            example: GENERADO
+      responses:
+        '200':
+          description: Pedidos encontrados
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PedidoResponse'
+        '204':
+          description: No se encontraton pedidos
+        '500':
+          description: Error al obtener pedidos por rango de fechas y estado
+
+  /pedidos/{id}:
+    get:
+      tags:
+        - Pedidos
+      summary: Obtener pedido por ID
+      operationId: getPedidoById
+      description: Retorna un pedido segun el ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Pedido encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PedidoResponse'
+        '204':
+          description: Pedido no encontrado
+        '500':
+          description: Error al obtener pedido por ID
+
+  /pedidos/{id}/{accion}:
+    put:
+      tags:
+        - Pedidos
+      summary: Actualizar estado del pedido
+      operationId: updateAccion
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: accion
+          in: path
+          required: true
+          schema:
+            type: string
+            enum:
+              - CANCEL
+              - CONFIRM-STOCK
+              - CONFIRM-PAY
+              - PREPARING
+              - READY
+              - DELIVERED
+      responses:
+        '200':
+          description: Estado del pedido actualizado
+        '500':
+          description: Error al actualizar el estado del pedido
+
+  /api/v1/auth/login:
+    post:
+      tags:
+        - Autenticación
+      summary: Iniciar sesión.
+      operationId: authLogin
+      description: Autenticacion en sistema
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthRequest'
+      responses:
+        '200':
+          description: Login exitoso
+        '500':
+          description: Error al autenticarse
+
+components:
+  parameters:
+    Authorization:
+      name: Authorization
+      in: header
+      required: false
+      schema:
+        type: string
+      example: Bearer token
+
+  schemas:
+    ClienteResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+        nombres:
+          type: string
+        apellidos:
+          type: string
+    ClienteRequest:
+      type: object
+      required:
+        - nombres
+        - apellidos
+      properties:
+        nombres:
+          type: string
+          description: Nombres del cliente
+        apellidos:
+          type: string
+          description: Apellidos del cliente
+    ProductoResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+        descripcion:
+          type: string
+        precioUnitario:
+          type: number
+        stock:
+          type: number
+        estado:
+          type: string
+        fechaCreacion:
+          type: string
+
+    PedidoRequest:
+      type: object
+      required:
+        - clienteId
+        - detalles
+      properties:
+        clienteId:
+          type: integer
+        detalles:
+          type: array
+          items:
+            $ref: '#/components/schemas/PedidoDetalleRequest'
+    PedidoDetalleRequest:
+      type: object
+      required:
+        - productoId
+        - cantidad
+      properties:
+        productoId:
+          type: integer
+        cantidad:
+          type: number
+    PedidoResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+        cliente:
+          $ref: '#/components/schemas/ClienteResponse'
+        fecha:
+          type: string
+        total:
+          type: number
+        estado:
+          type: string
+        detalles:
+          type: array
+          items:
+            $ref: '#/components/schemas/PedidoDetalleResponse'
+    PedidoDetalleResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+        pedido:
+          $ref: '#/components/schemas/PedidoResponse'
+        producto:
+          $ref: '#/components/schemas/ProductoResponse'
+        cantidad:
+          type: number
+        subtotal:
+          type: number
+
+    AuthRequest:
+      type: object
+      required:
+        - userName
+        - password
+      properties:
+        userName:
+          type: integer
+        password:
+          type: string
