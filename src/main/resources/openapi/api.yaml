@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: API Orders Management v1
-  version: 1.0.0
+  version: 1.0.1
   description: API para la gestión de clientes, productos, pedidos y autenticación.
 servers:
   - url: http://localhost:8180
@@ -343,9 +343,13 @@ components:
         nombres:
           type: string
           description: Nombres del cliente
+          minLength: 2
+          maxLength: 200
         apellidos:
           type: string
           description: Apellidos del cliente
+          minLength: 2
+          maxLength: 200
     ProductoResponse:
       type: object
       properties:
